@@ -292,7 +292,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						log.Fatal(err)
 					}
-					http.Redirect(w, r, "/admin#users", http.StatusFound)
+					http.Redirect(w, r, "/pireschapeaux#users", http.StatusFound)
 				}
 
 			}

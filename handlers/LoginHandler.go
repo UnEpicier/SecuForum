@@ -2,13 +2,13 @@ package forum
 
 import (
 	"database/sql"
+	"fmt"
 	f "forum"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -39,56 +39,49 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		row, err := db.Query("SELECT email, password FROM user WHERE email = ? LIMIT 1", email)
+		password, _ = f.HashPassword(password)
+
+		row, err := db.Query("SELECT uuid FROM user WHERE email = "+ email +" AND password = "+ password + " LIMIT 1")
+
 		if err != nil {
 			log.Fatal(err)
 		}
-		var db_email string
-		var db_password string
+		var db_uuid string
 		for row.Next() {
-			err = row.Scan(&db_email, &db_password)
+			err = row.Scan(&db_uuid)
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
 		row.Close()
 
-		if db_email == email && f.CheckPasswordhash(password, db_password) {
-			db_uuid := uuid.New().String()
+		fmt.Println(db_uuid)
 
-			_, err = db.Exec("UPDATE user SET uuid = ? WHERE email = ?", db_uuid, email)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			cookie := http.Cookie{
-				Name:       "user",
-				Value:      db_uuid,
-				Path:       "/",
-				Domain:     "",
-				Expires:    time.Time{},
-				RawExpires: "",
-				MaxAge:     0,
-				Secure:     false,
-				HttpOnly:   false,
-				SameSite:   0,
-				Raw:        "",
-				Unparsed:   []string{},
-			}
-			if keepAlive == "on" {
-				cookie.Expires = time.Now().AddDate(20, 0, 0)
-			}
-			http.SetCookie(w, &cookie)
-
-			_, err = db.Exec("UPDATE user SET last_seen = ? WHERE email = ?", time.Now(), db_email)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
-		} else {
-			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		cookie := http.Cookie{
+			Name:       "user",
+			Value:      db_uuid,
+			Path:       "/",
+			Domain:     "",
+			Expires:    time.Time{},
+			RawExpires: "",
+			MaxAge:     0,
+			Secure:     false,
+			HttpOnly:   false,
+			SameSite:   0,
+			Raw:        "",
+			Unparsed:   []string{},
 		}
+		if keepAlive == "on" {
+			cookie.Expires = time.Now().AddDate(20, 0, 0)
+		}
+		http.SetCookie(w, &cookie)
+
+		_, err = db.Exec("UPDATE user SET last_seen = ? WHERE email = ?", time.Now(), email)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
 	}
 
 	err := tplt.Execute(w, page)

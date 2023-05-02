@@ -25,8 +25,8 @@ func main() {
 	http.HandleFunc("/write", forum.WriteHandler)
 
 	// Admin
-	http.HandleFunc("/admin", forum.AdminHandler)
-	http.HandleFunc("/admin/delete", forum.AdminDeleteHandler)
+	http.HandleFunc("/pireschapeaux", forum.AdminHandler)
+	http.HandleFunc("/pireschapeaux/delete", forum.AdminDeleteHandler)
 
 	// User
 	http.HandleFunc("/user/login", forum.LoginHandler)
@@ -34,6 +34,11 @@ func main() {
 	http.HandleFunc("/user/profile", forum.ProfileHandler)
 	http.HandleFunc("/delete", forum.DeleteHandler)
 	http.HandleFunc("/user/logout", forum.LogoutHandler)
+
+	// robots.txt
+	http.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/robots.txt")
+	})
 
 	// Start the server
 	port := os.Getenv("PORT")
