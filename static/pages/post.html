@@ -13,13 +13,13 @@
 		<div class="info">
 			<div class="col">
 				<div class="title">{{.Content.Post.Title}}</div>
-				<div class="user">
+				<a class="user" href="/profile?uuid={{.Content.Post.User.Uuid}}">
 					<img src="{{ .Content.Post.User.ProfilePic }}" class="profilepic">
 					<p>{{.Content.Post.User.Username}}</p>
 					{{ if ne .Content.Post.User.Role "Member" }}
 					<span class="role" id="{{ .Content.Post.User.Role }}">{{ .Content.Post.User.Role }}</span>
 					{{ end }}
-				</div>
+				</a>
 			</div>
 			<div class="col">
 				<p>{{.Content.Post.CreationDate}}</p>
@@ -77,13 +77,13 @@
 	{{ range $i, $comment := .Content.Comments }}
 	<div class="comment">
 		<div class="infocmt">
-			<div class="user">
+			<a class="user" href="/profile?uuid={{.User.Uuid}}">
 				<img src="{{ .User.ProfilePic }}" class="profilepic">
 				<p>{{ .User.Username }}</p>
 				{{ if ne .User.Role "Member" }}
 				<span class="role" id="{{ .User.Role }}">{{ .User.Role }}</span>
 				{{ end }}
-			</div>
+			</a>
 			<div class="col">
 				{{ if .Pinned }}
 				<i class="fa-solid fa-thumbtack pinned"></i>

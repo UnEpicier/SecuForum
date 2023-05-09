@@ -39,9 +39,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		password, _ = f.HashPassword(password)
+		var hashed, _ = f.HashPassword(password)
 
-		row, err := db.Query("SELECT uuid FROM user WHERE email = "+ email +" AND password = "+ password + " LIMIT 1")
+		fmt.Println(hashed)
+
+		row, err := db.Query("SELECT uuid FROM user WHERE email = '"+ email +"' AND password = '"+ hashed + "' LIMIT 1;")
 
 		if err != nil {
 			log.Fatal(err)
@@ -81,7 +83,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
+		// http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
 	err := tplt.Execute(w, page)
