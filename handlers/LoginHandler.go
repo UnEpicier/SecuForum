@@ -2,7 +2,6 @@ package forum
 
 import (
 	"database/sql"
-	"fmt"
 	f "forum"
 	"html/template"
 	"log"
@@ -41,8 +40,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		var hashed, _ = f.HashPassword(password)
 
-		fmt.Println(hashed)
-
 		row, err := db.Query("SELECT uuid FROM user WHERE email = '"+ email +"' AND password = '"+ hashed + "' LIMIT 1;")
 
 		if err != nil {
@@ -56,8 +53,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		row.Close()
-
-		fmt.Println(db_uuid)
 
 		cookie := http.Cookie{
 			Name:       "user",
@@ -83,8 +78,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		// http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
+		//http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
 	err := tplt.Execute(w, page)
