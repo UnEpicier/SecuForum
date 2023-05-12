@@ -1,3 +1,5 @@
 ./forum.db
 static/assets/profile/*
 !static/assets/profile/default.png
+static/assets/reports/*.xml
+!static/assets/reports/example.xml
