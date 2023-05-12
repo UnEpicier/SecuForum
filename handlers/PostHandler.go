@@ -1,17 +1,36 @@
 package forum
 
 import (
+	"bytes"
 	"database/sql"
-	"fmt"
+	"encoding/xml"
 	f "forum"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type FirstReport struct {
+	XMLName xml.Name `xml:"report"`
+	Reason string `xml:"reason"`
+}
+
+type LastReport struct {
+	XMLName xml.Name `xml:"report"`
+	Reason string `xml:"reason"`
+	Type string `xml:"type"`
+	UserID string `xml:"userid"`
+	PostID string `xml:"postid"`
+	CommentID string `xml:"commentid"`
+}
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	files := []string{"./static/pages/post.html", "./static/layout/base.html"}
@@ -67,7 +86,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if r.Method == "POST" {
-				err = r.ParseForm()
+				err = r.ParseMultipartForm(0)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -168,24 +187,40 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 					}
 				} else if r.FormValue("form") == "report" {
-					typ := r.FormValue("type")
-					id := r.FormValue("id")
-					uid := r.FormValue("uid")
-					reason := r.FormValue("reason")
-					fmt.Println("Passed", typ, id, reason)
-					if typ == "post" {
-						e, err := db.Exec("INSERT INTO report (type, reason, creation_date, user_id, post_id) VALUES (?, ?, ?, ?, ?)", typ, reason, time.Now(), uid, id)
+					// Save XML file
+					report, header, err := r.FormFile("report")
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer report.Close()
+
+					buf := bytes.NewBuffer(nil)
+					if _, err := io.Copy(buf, report); err != nil {
+						log.Fatal(err)
+					}
+
+					row, err = db.Query("SELECT id FROM report ORDER BY id DESC LIMIT 1")
+					if err != nil {
+						log.Fatal(err)
+					}
+					var last_id int
+					for row.Next() {
+						err = row.Scan(&last_id)
 						if err != nil {
 							log.Fatal(err)
 						}
-						fmt.Println(e)
-					} else if typ == "comment" {
-						pid := r.FormValue("pid")
-						e, err := db.Exec("INSERT INTO report (type, reason, creation_date, user_id, post_id, comment_id) VALUES (?, ?, ?, ?, ?, ?)", typ, reason, time.Now(), uid, pid, id)
-						if err != nil {
-							log.Fatal(err)
-						}
-						fmt.Println(e)
+					}
+					row.Close()
+					last_id++
+
+					_, err = db.Exec("INSERT INTO report (url) VALUES (?);", "/assets/reports/"+strconv.Itoa(last_id)+filepath.Ext(header.Filename))
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					err = os.WriteFile("./static/assets/reports/" + strconv.Itoa(last_id) + filepath.Ext(header.Filename), buf.Bytes(), 0666)
+					if err != nil {
+						log.Fatal(err)
 					}
 				}
 			}

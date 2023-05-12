@@ -90,7 +90,6 @@ func WriteHandler(w http.ResponseWriter, r *http.Request) {
 								category := r.FormValue("category")
 								title := r.FormValue("title")
 								content := r.FormValue("content")
-								content = strings.Replace(content, "\r\n", "<br/>", -1)
 
 								row, err = db.Query("SELECT id FROM category WHERE name = ?", category)
 								if err != nil {
@@ -185,7 +184,6 @@ func WriteHandler(w http.ResponseWriter, r *http.Request) {
 						category := r.FormValue("category")
 						title := r.FormValue("title")
 						content := r.FormValue("content")
-						content = strings.Replace(content, "\r\n", "<br/>", -1)
 
 						row, err := db.Query("SELECT id FROM user WHERE uuid = ?", cookie.Value)
 						if err != nil {

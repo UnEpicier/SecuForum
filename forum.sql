@@ -56,11 +56,6 @@ CREATE TABLE vote (
 
 CREATE TABLE report (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  type TEXT NOT NULL,
-  reason TEXT NOT NULL,
-  creation_date DATETIME NOT NULL,
-  user_id INTEGER NOT NULL,
-  post_id INTEGER DEFAULT NULL,
-  comment_id INTEGER DEFAULT NULL,
-  FOREIGN KEY(user_id) REFERENCES user(id) FOREIGN KEY(post_id) REFERENCES post(id) FOREIGN KEY(comment_id) REFERENCES comment(id)
+  url TEXT NOT NULL,
+  creation_date DATETIME NOT NULL
 );

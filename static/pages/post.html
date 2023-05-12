@@ -90,8 +90,8 @@
 				{{ end }}
 				{{ .CreationDate }}
 				{{if or (eq .User.Role "Admin") (eq .User.Role "Moderator") }}
-				<i class="fa-solid fa-circle-exclamation report" onclick="showReportPopup('post')"
-					data-id="{{ $postid }}" data-uid="{{ $userid }}"></i>
+				<i class="fa-solid fa-circle-exclamation report" onclick="showReportPopup('comment')"
+					data-pid="{{ $postid }}" data-uid="{{ $userid }}" data-id="{{ .ID }}"></i>
 				{{end}}
 			</div>
 		</div>
@@ -174,9 +174,10 @@
 		<div class="pp-header">
 			<p class="pp-title" id="report-title">Report this</p>
 		</div>
-		<form class="pp-body" id="report-form" method="POST">
-			<textarea name="reason" class="textarea" id="report-textarea" oninput="autoGrow()"
-				placeholder="Reason..."></textarea>
+		<form class="pp-body" id="report-form" method="POST" enctype="multipart/form-data">
+			<p style="margin-bottom: 10px;font-size: .9rem;color: #fff;">Report need to be provided in a XML file</p>
+			<a href="/assets/reports/example.xml" style="display:block;margin-bottom: 10px;" download>Download template</a>
+			<input type="file" name="report" required>
 			<input type="hidden" name="form" value="report">
 			<button type="submit" class="submit">Report</button>
 		</form>
